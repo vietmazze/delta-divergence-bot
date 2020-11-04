@@ -72,6 +72,28 @@ def print_stream_data_buffer(binance_websocket_api_manager):
                     oldest_stream)
 
 
+"""Process and save the correct data for buy/sell"""
+
+
+def process_aggTrade(data):
+    trades = []
+    try:
+        trade['volume'] = float(data['quantity']) * float(data['price'])
+        trade['side'] = 'None'
+        if data['is_market_maker'] == False:
+            trade['side'] = "Buy"
+        elif data['is_market_maker'] == True:
+            trade['side'] = "Sell"
+        trades.append(trade)
+    #   trades = [{side:"buy",volume:2000},{..},{..}]
+    except Exception as e:
+        pass
+
+# Every 1min, take total of all trades and combine to get netvolume?
+# Every 1min, take the avg of price, or just get the last candle on the last min?
+# if positive vol1 > vol2 > vol3 and price1 > price2 > price3 = Bull
+
+
 worker_thread = threading.Thread(
     target=print_stream_data_buffer, args=(binance_websocket_api_manager,))
 worker_thread.start()

@@ -77,15 +77,26 @@ def print_stream_data_buffer(binance_websocket_api_manager):
 
 
 def process_aggTrade(data):
-    trades = []
+    trade = {}
+    price = {}
     try:
-        trade['volume'] = float(data['quantity']) * float(data['price'])
-        trade['side'] = 'None'
-        if data['is_market_maker'] == False:
-            trade['side'] = "Buy"
-        elif data['is_market_maker'] == True:
-            trade['side'] = "Sell"
-        trades.append(trade)
+        if data['event_type'] == "aggTrade":
+
+            trade['volume'] = float(data['quantity']) * float(data['price'])
+            trade['side'] = 'None'
+            if data['is_market_maker'] == False:
+                trade['side'] = "Buy"
+            elif data['is_market_maker'] == True:
+                trade['side'] = "Sell"
+            trades.append(trade)
+        if data['event_type'] == "kline":
+            if data['kline']['isClosed']:
+                price['symbol'] = data['symbol']
+                price['interval'] = data['kline']['interval']
+                price['curr_time'] = data['event_time']
+                price['close_time'] = data['kline']['close_price']
+                price['timestamp'] = data['kline']['kline_close_time']
+                prices.append(price)
     #   trades = [{side:"buy",volume:2000},{..},{..}]
     except Exception as e:
         pass
@@ -137,7 +148,6 @@ def calc_deltaDivergence():
 # Every 1min, take the avg of price, or just get the last candle on the last min?
 # if positive vol1 > vol2 > vol3 and price1 > price2 > price3 = Bull
 # if negative vol1 > vol2 > vol3 and price1 < price2 < price3 = Bear
-
 
 worker_thread = threading.Thread(
     target=print_stream_data_buffer, args=(binance_websocket_api_manager,))

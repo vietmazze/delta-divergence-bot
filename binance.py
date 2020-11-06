@@ -39,7 +39,8 @@ Create channels and markets
 
 channels = {'aggTrade'}
 markets = {'btcusdt'}
-
+prices = []
+trades = []
 curr_stream = binance_websocket_api_manager.create_stream(
     channels, markets)
 
@@ -64,7 +65,7 @@ def print_stream_data_buffer(binance_websocket_api_manager):
             time.sleep(0.01)
         else:
             try:
-                print(oldest_stream)
+                process_aggTrade(oldest_stream)
 
             except KeyError:
                 print("error printing data")
@@ -89,6 +90,7 @@ def process_aggTrade(data):
             elif data['is_market_maker'] == True:
                 trade['side'] = "Sell"
             trades.append(trade)
+
         if data['event_type'] == "kline":
             if data['kline']['isClosed']:
                 price['symbol'] = data['symbol']
@@ -98,48 +100,49 @@ def process_aggTrade(data):
                 price['timestamp'] = data['kline']['kline_close_time']
                 prices.append(price)
     #   trades = [{side:"buy",volume:2000},{..},{..}]
+        print(prices, trades)
     except Exception as e:
         pass
 
 
-def process_totalVolume():
-    temp_trades = trades
-    buy_volume = 0
-    sell_volume = 0
-    try:
-        for trade in temp_trades:
-            if trade['side'] == "Sell":
-                sell_volume += trade['volume']
-            elif trade['side'] == "Buy":
-                buy_volume += trade['volume']
-        currDelta = buy_volume - sell_volume
-        delta.append(currDelta)
-    except Exception as e:
-        pass
+# def process_totalVolume():
+#     temp_trades = trades
+#     buy_volume = 0
+#     sell_volume = 0
+#     try:
+#         for trade in temp_trades:
+#             if trade['side'] == "Sell":
+#                 sell_volume += trade['volume']
+#             elif trade['side'] == "Buy":
+#                 buy_volume += trade['volume']
+#         currDelta = buy_volume - sell_volume
+#         delta.append(currDelta)
+#     except Exception as e:
+#         pass
 
 
-def calc_deltaDivergence():
-    neg_deltaDiv = [False] for __ in range(len(delta))
-    pos_deltaDiv = [False] for __ in range(len(delta))
-    # [positive,negative,negative]
-    # [negative,negative,positive]
+# def calc_deltaDivergence():
+#     neg_deltaDiv = [False] for __ in range(len(delta))
+#     pos_deltaDiv = [False] for __ in range(len(delta))
+#     # [positive,negative,negative]
+#     # [negative,negative,positive]
 
-    # check for negative vol Bearish:
-    if max(delta) < 0:
-        # [-100,-200,-300]
-        for i in range(len(delta)):
-            if delta[i] > delta[i+1]:
-                neg_deltaDiv[i] = True
-            else:
-                neg_deltaDiv[i] = False
-    # check for positive vol Bullish:
-    elif min(delta) > 0:
-        # [300,200,100]
-        for i in range(0, len(delta)):
-            if delta[i] > delta[i+1]:
-                pos_deltaDiv[i] = True
-            else:
-                pos_deltaDiv[i] = False
+#     # check for negative vol Bearish:
+#     if max(delta) < 0:
+#         # [-100,-200,-300]
+#         for i in range(len(delta)):
+#             if delta[i] > delta[i+1]:
+#                 neg_deltaDiv[i] = True
+#             else:
+#                 neg_deltaDiv[i] = False
+#     # check for positive vol Bullish:
+#     elif min(delta) > 0:
+#         # [300,200,100]
+#         for i in range(0, len(delta)):
+#             if delta[i] > delta[i+1]:
+#                 pos_deltaDiv[i] = True
+#             else:
+#                 pos_deltaDiv[i] = False
 
     # assign deltaDiv to the specific price spot or timestamp
 

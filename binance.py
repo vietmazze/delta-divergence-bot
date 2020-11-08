@@ -21,6 +21,7 @@ import os
 import threading
 import json
 import numpy as np
+import asyncio
 
 logging.basicConfig(level=logging.INFO,
                     filename=os.path.basename(__file__) + '.log',

@@ -179,3 +179,29 @@
 2020-11-06 15:11:35,033 [INFO    ] 6228 10128 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 10.2 kB/s at 2020-11-06, 20:11:35 UTC
 2020-11-06 15:11:39,248 [INFO    ] 6228 10128 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 13.27 kB/s at 2020-11-06, 20:11:39 UTC
 2020-11-06 15:11:44,064 [INFO    ] 6228 10128 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 32.22 kB/s at 2020-11-06, 20:11:44 UTC
+2020-11-07 09:49:39,831 [INFO    ] 11056 16168 unicorn_binance_websocket_api_manager: New instance of unicorn-binance-websocket-api_1.26.0-python_3.7.6 started ...
+2020-11-07 09:49:39,832 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() new instance created with frequent_checks_id=1604760579.8324347
+2020-11-07 09:49:39,832 [INFO    ] 11056 12016 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._keepalive_streams() new instance created with keepalive_streams_id=1604760579.8324347
+2020-11-07 09:49:40,019 [INFO    ] 11056 16168 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.create_stream({'aggTrade'}, ['btcusdt'], None, False, False) with stream_id=3c8655e6-678d-4195-96c8-6d1e1a3908b2
+2020-11-07 09:49:40,020 [INFO    ] 11056 16168 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._add_stream_to_stream_list(3c8655e6-678d-4195-96c8-6d1e1a3908b2, {'aggTrade'}, ['btcusdt'], None, False, False)
+2020-11-07 09:49:40,022 [INFO    ] 11056 11652 unicorn_binance_websocket_api_socket: BinanceWebSocketApiSocket.start_socket(3c8655e6-678d-4195-96c8-6d1e1a3908b2, {'aggTrade'}, ['btcusdt']) socket_id=6fb237f0-783c-4a84-824b-71d5f65d7dd6 recent_socket_id=6fb237f0-783c-4a84-824b-71d5f65d7dd6
+2020-11-07 09:49:40,023 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.subscribe_to_stream(3c8655e6-678d-4195-96c8-6d1e1a3908b2, {'aggTrade'}, ['btcusdt']) started ...
+2020-11-07 09:49:40,023 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.create_payload(3c8655e6-678d-4195-96c8-6d1e1a3908b2, ['aggTrade'], ['btcusdt']) started ...
+2020-11-07 09:49:40,024 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.create_payload(3c8655e6-678d-4195-96c8-6d1e1a3908b2, ['aggTrade'], ['btcusdt']) Payload: [{'method': 'SUBSCRIBE', 'params': ['btcusdt@aggTrade'], 'id': 1}]
+2020-11-07 09:49:40,024 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.create_payload(3c8655e6-678d-4195-96c8-6d1e1a3908b2, ['aggTrade'], ['btcusdt']) finished ...
+2020-11-07 09:49:40,024 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.subscribe_to_stream(3c8655e6-678d-4195-96c8-6d1e1a3908b2, ['aggTrade'], ['btcusdt']) finished ...
+2020-11-07 09:49:40,024 [INFO    ] 11056 11652 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager.create_websocket_uri({'aggTrade'}, ['btcusdt'], , False) - Created websocket URI for stream_id=3c8655e6-678d-4195-96c8-6d1e1a3908b2 is wss://fstream.binance.com/stream?streams=btcusdt@aggTrade
+2020-11-07 09:49:40,039 [ERROR   ] 11056 16168 ultratb: Internal Python error in the inspect module.
+Below is the traceback from this internal error.
+
+2020-11-07 09:49:40,093 [INFO    ] 11056 16168 ultratb: 
+Unfortunately, your original traceback can not be constructed.
+
+2020-11-07 09:49:40,920 [INFO    ] 11056 11652 unicorn_binance_websocket_api_socket: BinanceWebSocketApiSocket.start_socket(3c8655e6-678d-4195-96c8-6d1e1a3908b2, {'aggTrade'}, ['btcusdt'] socket_id=6fb237f0-783c-4a84-824b-71d5f65d7dd6 recent_socket_id=6fb237f0-783c-4a84-824b-71d5f65d7dd6 - Sending payload started ...
+2020-11-07 09:49:40,921 [INFO    ] 11056 11652 unicorn_binance_websocket_api_socket: BinanceWebSocketApiSocket.start_socket(3c8655e6-678d-4195-96c8-6d1e1a3908b2, {'aggTrade'}, ['btcusdt'] - Sending payload: {'method': 'SUBSCRIBE', 'params': ['btcusdt@aggTrade'], 'id': 1}
+2020-11-07 09:49:41,258 [INFO    ] 11056 11652 unicorn_binance_websocket_api_socket: BinanceWebSocketApiSocket.start_socket(3c8655e6-678d-4195-96c8-6d1e1a3908b2) - Received result message: {"id":1,"result":null}
+2020-11-07 09:49:42,240 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 1.19 kB/s at 2020-11-07, 14:49:42 UTC
+2020-11-07 09:49:43,144 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 3.16 kB/s at 2020-11-07, 14:49:43 UTC
+2020-11-07 09:49:44,048 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 6.53 kB/s at 2020-11-07, 14:49:44 UTC
+2020-11-07 09:49:53,082 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 7.21 kB/s at 2020-11-07, 14:49:53 UTC
+2020-11-07 09:50:01,216 [INFO    ] 11056 16888 unicorn_binance_websocket_api_manager: BinanceWebSocketApiManager._frequent_checks() - reached new `highest_receiving_speed` 10.11 kB/s at 2020-11-07, 14:50:01 UTC

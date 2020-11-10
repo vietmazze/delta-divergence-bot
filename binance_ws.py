@@ -5,6 +5,7 @@ import time
 import os
 import threading
 import json
+import schedule
 import numpy as np
 from typing import Optional, Dict, Any, List
 from colorprint import ColorPrint
@@ -26,8 +27,9 @@ class BinanceWebSocket:
         self.log = ColorPrint()
 
     def create_streams(self):
-        self.streams= self.binance_websocket_manager.create_stream(self.channels,self.markets)
-        
+        self.streams = self.binance_websocket_manager.create_stream(
+            self.channels, self.markets)
+
     def get_stream_data_buffer(self):
         print("Initialize, wait 30secs for streams to come in")
         time.sleep(5)
@@ -49,7 +51,7 @@ class BinanceWebSocket:
                     self.binance_websocket_manager.add_to_stream_buffer(
                         oldest_stream)
 
-    def process_aggTrade(data):
+    def process_aggTrade(self, data):
         trade = {}
         price = {}
         try:
@@ -69,14 +71,15 @@ class BinanceWebSocket:
                     price['interval'] = data['kline']['interval']
                     price['curr_time'] = data['event_time']
                     price['close_time'] = data['kline']['kline_close_time']
-                    price['close_price'] = data['kline']['close_price']                   
+                    price['close_price'] = data['kline']['close_price']
                     self.prices.append(price)
     #   trades = [{side:"buy",volume:2000},{..},{..}]
         except Exception as e:
             self.log.red(
                 f'Exception when processing buffer_stream in process_aggTrade(): \n {e}')
+
     def process_totalPrice(self) -> None:
-        temp_prices= self.prices
+        temp_prices = self.prices
         price_tag = []
         try:
             for price in temp_prices:
@@ -84,6 +87,7 @@ class BinanceWebSocket:
             self.calc_priceDivergence(price_tag)
         except Exception as e:
             pass
+
     def process_totalVolume(self) -> None:
         temp_trades = self.trades
         buy_volume = 0
@@ -100,7 +104,7 @@ class BinanceWebSocket:
             self.log.red(
                 f'Exception when processing in process_totalVolume():  \n {e}')
 
-    def calc_volumeDivergence():
+    def calc_volumeDivergence(self):
         delta = self.delta
         neg_deltaDiv = [False] for __ in range(len(delta))
         pos_deltaDiv = [False] for __ in range(len(delta))
@@ -128,7 +132,7 @@ class BinanceWebSocket:
             self.log.red(
                 f'Exception when processing in calc_deltaDivergence():  \n {e}')
 
-    def calc_priceDivergence(price_tag):
+    def calc_priceDivergence(self, price_tag):
         #price_tag = []
         price_decrease = [False] for __ in range(len(price_tag))
         price_increase = [False] for __ in range(len(price_tag))
@@ -142,6 +146,7 @@ class BinanceWebSocket:
                 price_increase[i] = True
             else:
                 price_increase[i] = False
+
 
 def main():
     input("Starting Binance Websocket")

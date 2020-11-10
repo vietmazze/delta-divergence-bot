@@ -38,7 +38,7 @@ binance_websocket_api_manager = BinanceWebSocketApiManager(
 Create channels and markets
 """
 
-channels = {'aggTrade'}
+channels = {'kline_1m'}
 markets = {'btcusdt'}
 prices = []
 trades = []
@@ -66,8 +66,10 @@ def print_stream_data_buffer(binance_websocket_api_manager):
             time.sleep(0.01)
         else:
             try:
-                process_aggTrade(oldest_stream)
-
+                if len(oldest_stream) > 4:
+                    process_aggTrade(oldest_stream)
+                else:
+                    pass
             except KeyError:
                 print("error printing data")
                 # not able to process the data? write it back to the stream_buffer
@@ -84,74 +86,27 @@ def process_aggTrade(data):
     try:
         if data['event_type'] == "aggTrade":
 
-            trade['volume'] = float(data['quantity']) * float(data['price'])
+            trade['volume'] = float(
+                data['quantity']) * float(data['price'])
             trade['side'] = 'None'
             if data['is_market_maker'] == False:
                 trade['side'] = "Buy"
             elif data['is_market_maker'] == True:
                 trade['side'] = "Sell"
             trades.append(trade)
-
-        if data['event_type'] == "kline":
-            if data['kline']['isClosed']:
+        elif data['event_type'] == "kline":
+            if data['kline']['is_closed']:
                 price['symbol'] = data['symbol']
                 price['interval'] = data['kline']['interval']
                 price['curr_time'] = data['event_time']
-                price['close_time'] = data['kline']['close_price']
-                price['timestamp'] = data['kline']['kline_close_time']
+                price['close_time'] = data['kline']['kline_close_time']
+                price['close_price'] = data['kline']['close_price']
                 prices.append(price)
     #   trades = [{side:"buy",volume:2000},{..},{..}]
-        print(prices, trades)
+                print(f'{price} \n')
     except Exception as e:
-        pass
+        print("failed")
 
-
-# def process_totalVolume():
-#     temp_trades = trades
-#     buy_volume = 0
-#     sell_volume = 0
-#     try:
-#         for trade in temp_trades:
-#             if trade['side'] == "Sell":
-#                 sell_volume += trade['volume']
-#             elif trade['side'] == "Buy":
-#                 buy_volume += trade['volume']
-#         currDelta = buy_volume - sell_volume
-#         delta.append(currDelta)
-#     except Exception as e:
-#         pass
-
-
-# def calc_deltaDivergence():
-#     neg_deltaDiv = [False] for __ in range(len(delta))
-#     pos_deltaDiv = [False] for __ in range(len(delta))
-#     # [positive,negative,negative]
-#     # [negative,negative,positive]
-
-#     # check for negative vol Bearish:
-#     if max(delta) < 0:
-#         # [-100,-200,-300]
-#         for i in range(len(delta)):
-#             if delta[i] > delta[i+1]:
-#                 neg_deltaDiv[i] = True
-#             else:
-#                 neg_deltaDiv[i] = False
-#     # check for positive vol Bullish:
-#     elif min(delta) > 0:
-#         # [300,200,100]
-#         for i in range(0, len(delta)):
-#             if delta[i] > delta[i+1]:
-#                 pos_deltaDiv[i] = True
-#             else:
-#                 pos_deltaDiv[i] = False
-
-    # assign deltaDiv to the specific price spot or timestamp
-
-
-# Every 1min, take total of all trades and combine to get netvolume?
-# Every 1min, take the avg of price, or just get the last candle on the last min?
-# if positive vol1 > vol2 > vol3 and price1 > price2 > price3 = Bull
-# if negative vol1 > vol2 > vol3 and price1 < price2 < price3 = Bear
 
 worker_thread = threading.Thread(
     target=print_stream_data_buffer, args=(binance_websocket_api_manager,))

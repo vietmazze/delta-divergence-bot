@@ -16,11 +16,13 @@ logging.basicConfig(level=logging.INFO, format=(
 
 
 class BinanceWebSocket:
-    def __init__(self) -> None:
+    def __init__(self,) -> None:
         self.prices = []
         self.trades = []
         self.vol_deltas = []
-        self.price_delta = []
+        self.price_deltas = []
+        self.bearish_delta = []
+        self.bullish_delta = []
         self.buy_volume = 0
         self.sell_volume = 0
         self.binance_websocket_manager = BinanceWebSocketApiManager(
@@ -95,7 +97,7 @@ class BinanceWebSocket:
         try:
             for price in temp_prices:
                 price_tag.append(price['close_price'])
-            //self.calc_priceDivergence(price_tag)
+            # self.calc_priceDivergence(price_tag)
         except Exception as e:
             pass
 
@@ -108,7 +110,7 @@ class BinanceWebSocket:
                 elif trade['side'] == "Buy":
                     self.buy_volume += trade['volume']
             currDelta = self.buy_volume - self.sell_volume
-            self.vol_delta.append(float(currDelta))
+            self.vol_deltas.append(float(currDelta))
             self.trades = []
         except Exception as e:
             self.log.red(
@@ -116,8 +118,8 @@ class BinanceWebSocket:
 
     def calc_volumeDivergence(self):
         deltas = self.vol_deltas
-        bearish_delta = [[False] for __ in range(len(deltas))]
-        bullish_delta = [[False] for __ in range(len(deltas))]
+        bearish_delta = [False for __ in range(len(deltas))]
+        bullish_delta = [False for __ in range(len(deltas))]
         # [positive,negative,negative]
         # [negative,negative,positive]
 
@@ -138,39 +140,65 @@ class BinanceWebSocket:
                 else:
                     self.log.blue(
                         f'Condition not met for deltas in calc_volumeDiv, {deltas[i]} vs {deltas[i+1]}')
-
+            self.bearish_delta = bearish_delta
+            self.bullish_delta = bullish_delta
         except Exception as e:
             self.log.red(
                 f'Exception when processing in calc_deltaDivergence():  \n {e}')
 
-    def calc_priceDivergence(self, price_tag):
-        #price_tag = []
-        price_decrease = [False] for __ in range(len(price_tag))
-        price_increase = [False] for __ in range(len(price_tag))
-        for i in range(len(price_tag)):
-            if price_tag[i] > price_tag[i+1]:
-                price_decrease[i] = True
-            else:
-                price_decrease[i] = False
-        for i in range(len(price_tag)):
-            if price_tag[i] < price_tag[i+1]:
-                price_increase[i] = True
-            else:
-                price_increase[i] = False
+    # def calc_priceDivergence(self, price_tag):
+    #     #price_tag = []
+    #     price_decrease = [False for __ in range(len(price_tag))]
+    #     price_increase =[False for __ in range(len(price_tag))]
+    #     for i in range(len(price_tag)):
+    #         if price_tag[i] > price_tag[i+1]:
+    #             price_decrease[i] = True
+    #         else:
+    #             price_decrease[i] = False
+    #     for i in range(len(price_tag)):
+    #         if price_tag[i] < price_tag[i+1]:
+    #             price_increase[i] = True
+    #         else:
+    #             price_increase[i] = False
+    def print_data(self):
+        self.log.green(f"""
+
+                        Volume Delta : {self.vol_deltas} \n
+                        Bearish Delta: {self.bearish_delta} \n
+                        Bullish Delta: {self.bullish_delta}""")
+
+    def load_thread(self):
+        # start a worker process to move the received stream_data from the stream_buffer to a print function
+        worker_thread = threading.Thread(
+            target=self.get_stream_data_buffer, args=())
+        worker_thread.start()
 
 
 def main():
-    input("Starting Binance Websocket")
+    cp.green(f'Starting Binance WebSocket Manager')
     try:
+
         # calling Binance manager.
-    except expression as identifier:
-        pass
+        binance = BinanceWebSocket()
+        binance.create_streams()
+        binance.load_thread()
+        time.sleep(5)
+        schedule.every(1).minutes.do(binance.process_totalVolume)
+        schedule.every(1).minutes.do(binance.calc_volumeDivergence)
+        schedule.every(1).minutes.do(binance.print_data)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+
+    except Exception as ex:
+        cp.red(f'Failed to start main() {ex}')
 
 
 if __name__ == '__main__':
     try:
+        cp = ColorPrint()
         main()
     except Exception as e:
-        print("Cannot start binance_ws.py, please check logs")
+        cp.red("Cannot start binance_ws.py, please check logs")
     finally:
         exit()

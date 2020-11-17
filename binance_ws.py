@@ -6,6 +6,7 @@ import threading
 import json
 import schedule
 import numpy as np
+import datetime
 import asyncio
 
 from unicorn_binance_websocket_api.unicorn_binance_websocket_api_manager import BinanceWebSocketApiManager
@@ -37,7 +38,7 @@ class BinanceWebSocket:
         self.bullish_delta = []
         self.binance_websocket_manager = BinanceWebSocketApiManager(
             exchange="binance.com-futures")
-        self.channels = {'aggTrade', 'kline_1m'}
+        self.channels = {'aggTrade', 'kline_15m'}
         self.markets = {'btcusdt'}
         self.log = ColorPrint()
         self.timer = Timer()
@@ -139,43 +140,59 @@ class BinanceWebSocket:
                     delta = float(
                         self.total_volume['buy_volume'] - self.total_volume['sell_volume'])
                     price = self.prices.pop()
-
+                curr_time = float(price['curr_time']) / \
+                    1000 if price['curr_time'] else 0
+                timestamp = datetime.datetime.fromtimestamp(
+                    curr_time).strftime('%Y-%m-%d %H:%M:%S')
                 total_delta = {
-                    "timestamp": float(price['curr_time']) if price['curr_time'] else 0,
-                    "delta": float(delta),
+                    "timestamp": timestamp,
+                    "delta": round(float(delta), 2),
                     "price": float(price['close']) if price['close'] else 0,
                 }
-                try:
-                    self.total_deltas.append(total_delta)
-                except Exception as e:
-                    self.log.red("Unable to append to total_deltas")
-                self.print_data()
+
+                self.total_deltas.append(total_delta)
+                # self.print_data()
             except Exception as e:
                 self.log.red(f'Exception error in process_combineData() {e}')
 
+    """
+    Delta: 
+    [{'timestamp': '2020-11-16 18:01:00', 'delta': 204419.04, 'price': 16714.89}, 
+    {'timestamp': '2020-11-16 18:02:00', 'delta': 687659.15, 'price': 16736.04}]  
+
+    """
+
     def calc_volumeDivergence(self):
-        deltas = self.vol_deltas
+        self.log.blue(f'Running cal_volumeDivergence')
+        deltas = self.total_deltas
         bearish_delta = [False for __ in range(len(deltas))]
         bullish_delta = [False for __ in range(len(deltas))]
 
         try:
             for i in range(len(deltas)-1):
                 # bearish
-                if deltas[i] > deltas[i+1]:
-                    # only accept positive entries:
-                    if deltas[i] > 0 and deltas[i+1] > 0:
-                        bearish_delta[i] = True
-                        bearish_delta[i+1] = True
+                if deltas[i]['price'] < deltas[i+1]['price']:
+                    if deltas[i]['delta'] > deltas[i+1]['delta']:
+                        # only accept positive entries:
+                        if deltas[i]['delta'] > 0 and deltas[i+1]['delta'] > 0:
+                            bearish_delta[i] = True
+                            bearish_delta[i+1] = True
+                            self.log.red(f'Data: {deltas[i]}, {deltas[i+1]}')
+                            self.log.red(
+                                f'Bear: {bearish_delta[i]}, {bearish_delta[i+1]}')
 
-                elif deltas[i] < deltas[i+1]:
-                    if deltas[i] < 0 and deltas[i+1] < 0:
-                        bullish_delta[i] = True
-                        bullish_delta[i+1] = True
+                elif deltas[i]['price'] > deltas[i+1]['price']:
+                    if deltas[i]['delta'] < deltas[i+1]['delta']:
+                        if deltas[i]['delta'] < 0 and deltas[i+1]['delta'] < 0:
+                            bullish_delta[i] = True
+                            bullish_delta[i+1] = True
+                            self.log.red(f'Data: {deltas[i]}, {deltas[i+1]}')
+                            self.log.red(
+                                f'Bull: {bearish_delta[i]}, {bearish_delta[i+1]}')
                 else:
-                    self.log.blue(
+                    log.blue(
                         f'Condition not met for deltas in calc_volumeDiv, {deltas[i]} vs {deltas[i+1]}')
-            self.bearish_delta = bearish_delta
-            self.bullish_delta = bullish_delta
+
         except Exception as e:
             self.log.red(
                 f'Exception when processing in calc_deltaDivergence():  \n {e}')
@@ -201,8 +218,8 @@ def main():
         binance.load_thread()
         time.sleep(5)
         schedule.every(1).minutes.do(binance.process_totalVolume)
-        # schedule.every(1).minutes.do(binance.process_combineData)
-        # schedule.every(1).minutes.do(binance.print_data)
+        schedule.every(15).minutes.do(binance.calc_volumeDivergence)
+
         while True:
             schedule.run_pending()
             time.sleep(1)
